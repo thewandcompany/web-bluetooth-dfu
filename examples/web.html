@@ -38,15 +38,17 @@
         a { color: #a0a0a0; text-decoration: none; font-weight: 500;}
         a:hover { color: #d7ecff; filter:brightness(1.2); }
         strong { font-weight: 500; }
-        #drop { position: relative; margin: 20px auto; max-width: 500px; background-color: rgba(255, 255, 255, 0.10); padding: 100px 20px 80px 20px; outline: 2px dashed #072b44; outline-offset: -10px; }
+        #drop { position: relative; margin: 20px auto; min-height: 250px; max-width: 500px; background-color: rgba(255, 255, 255, 0.10); padding: 60px 20px; outline: 2px dashed #072b44; outline-offset: -10px; 
+            display:flex; flex-direction: column; justify-content: center; align-items: center; }
         #drop.hover { outline-offset: -10px; background-color: rgba(255, 255, 255, 0.15); }
         #icon { width: 100%; fill: #d7ecfb; margin-bottom: 30px; }
         #github { fill: #d7ecfb; }
         #github:hover { fill: #8bb5ba; }
         #file { width: 0.1px; height: 0.1px; opacity: 0; z-index: -1; }
+        #warning { margin-bottom: 20px; display: none;}
         #label { cursor: pointer; }
         #label:hover strong { color: #8bb5ba; }
-        #select { position: absolute; left: 0; right: 0; visibility: hidden; }
+        #select { visibility: hidden; }
         #button { font-size: 12px; color: inherit; margin: 20px auto; border: 0px; background-color: #1b679c; height: 30px; padding: 0 30px; border-radius: 4px; text-transform: uppercase; cursor: pointer; outline: none; }
         #button:hover { background: #2674ab; }
         #status { margin: 20px auto; border: 1px solid #d7ecfb; width: 70%; height: 24px; visibility: hidden; }
@@ -64,7 +66,10 @@
 		<svg id="icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43">
             <path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"/>
         </svg>
-
+        <div id="warning">
+            <b>Please wait – this will take around 6 minutes.</b><br>
+            Keep this page in the foreground and do not change browser tabs, otherwise the firmware update might fail.
+        </div>
 		<input id="file" type="file" />
 		<label id="label" for="file">
             <strong>Choose a firmware package</strong>
@@ -97,6 +102,7 @@
         let fileEl = document.getElementById("file");
         let selectEl = document.getElementById("select");
         let buttonEl = document.getElementById("button");
+        let warningEl = document.getElementById("warning");
         let labelEl = document.getElementById("label");
         let statusEl = document.getElementById("status");
         let transferEl = document.getElementById("transfer");
@@ -155,10 +161,12 @@
                     setStatus("DFU mode set, select device again");
                     return;
                 }
+                warningEl.style.display = "block";
                 return update(dfu, device);
             })
             .catch(error => {
                 statusEl.style.visibility = "hidden";
+                warningEl.style.display = "none";
                 setStatus(error);
             });
         }
@@ -184,11 +192,13 @@
             })
             .then(() => {
                 setStatus("Update complete!");
+                warningEl.style.display = "none";
                 setTransfer();
                 fileEl.value = "";
             })
             .catch(error => {
                 statusEl.style.visibility = "hidden";
+                warningEl.style.display = "none";
                 setStatus(error);
             });
         }
@@ -227,6 +237,12 @@
             // const filename = await getUpgradeFilename();
             // $("#upgradeFile").html(`Upgrade file: <b>${filename}</b>`);
             document.body.style.opacity = 1;
+            if ('bluetooth' in navigator) {
+                console.log('Web Bluetooth is supported in this browser.');
+            } else {
+                // Show an error message if WebUSB is not supported
+                alert("Unsupported web browser.\n\nPlease use a browser that supports Web Bluetooth, such as Chrome, Edge or Opera.");
+            }
         };
     </script>
 </body>
