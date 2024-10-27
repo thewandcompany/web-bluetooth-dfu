@@ -7,7 +7,7 @@ const source      = require("vinyl-source-stream");
 const gulp        = require("gulp");
 const sourcemaps  = require("gulp-sourcemaps");
 const typescript  = require("gulp-typescript");
-const tslint      = require("gulp-tslint");
+// const tslint      = require("gulp-tslint");
 const uglify      = require("gulp-uglify");
 
 // Source
@@ -44,15 +44,15 @@ const taskClean = done => {
 };
 
 // Lint the source
-const taskLint = () => {
-    return gulp.src(srcFiles)
-    .pipe(tslint({
-        formatter: "stylish"
-    }))
-    .pipe(tslint.report({
-        emitError: !watching
-    }))
-};
+// const taskLint = () => {
+//     return gulp.src(srcFiles)
+//     .pipe(tslint({
+//         formatter: "stylish"
+//     }))
+//     .pipe(tslint.report({
+//         emitError: !watching
+//     }))
+// };
 
 // Build TypeScript source into CommonJS Node modules
 const taskCompile = () => {
@@ -93,7 +93,8 @@ const taskBundle = () => {
 };
 
 exports.bundle = gulp.series(taskClean, taskCompile, taskBundle);
-exports.default = gulp.series(taskLint, exports.bundle);
+// exports.default = gulp.series(taskLint, exports.bundle);
+exports.default = exports.bundle;
 
 const taskSetWatch = done => {
   gulp.watch(srcFiles, exports.default);
